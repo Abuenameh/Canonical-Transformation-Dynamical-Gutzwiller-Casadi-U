@@ -225,9 +225,9 @@ int main(int argc, char** argv) {
 
 #ifdef AMAZON
     //    path resdir("/home/ubuntu/Results/Canonical Transformation Dynamical Gutzwiller");
-    path resdir("/home/ubuntu/Dropbox/Amazon EC2/Simulation Results/Canonical Transformation Dynamical Gutzwiller J");
+    path resdir("/home/ubuntu/Dropbox/Amazon EC2/Simulation Results/Canonical Transformation Dynamical Gutzwiller U");
 #else
-    path resdir("/Users/Abuenameh/Documents/Simulation Results/Canonical Transformation Dynamical Gutzwiller J");
+    path resdir("/Users/Abuenameh/Documents/Simulation Results/Canonical Transformation Dynamical Gutzwiller U");
     //        path resdir("/Users/Abuenameh/Documents/Simulation Results/Dynamical Gutzwiller Hartmann Comparison");
 #endif
     if (!exists(resdir)) {
