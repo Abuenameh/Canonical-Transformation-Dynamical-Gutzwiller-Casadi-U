@@ -501,7 +501,7 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
     gsparams.push_back(1);
     gsparams.push_back(0);
 
-    U00 = 0.5;//1;
+    U00 = 100;//0.5;//1;
     J0 = vector<double>(L);
     for (int i = 0; i < L; i++) {
         J0[i] = Ji_;
@@ -528,7 +528,7 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
 
         vector<SX> xiv = SX::sym("xi", 1, 1, L);
 
-        U0 = 0.5;//1;//scale * UW(Wt);
+        U0 = 100;//0.5;//1;//scale * UW(Wt);
         for (int i = 0; i < L; i++) {
             J[i] = Jt;//scale * JWij(Wt * xiv[i], Wt * xiv[mod(i + 1)]);
             dU[i] = U0 * xiv[i] - U0;//scale * UW(Wt * xiv[i]) - U0;
