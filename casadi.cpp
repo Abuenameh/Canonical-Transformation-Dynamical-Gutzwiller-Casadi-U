@@ -501,7 +501,7 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
     gsparams.push_back(1);
     gsparams.push_back(0);
 
-    U00 = 1;
+    U00 = 0.5;//1;
     J0 = vector<double>(L);
     for (int i = 0; i < L; i++) {
         J0[i] = Ji_;
