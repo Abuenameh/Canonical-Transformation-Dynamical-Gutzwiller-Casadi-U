@@ -996,6 +996,119 @@ SX DynamicsProblem::energy(vector<SX>& fin, vector<SX>& J, SX& U0, vector<SX>& d
 }
 
 SX DynamicsProblem::energy(int i, int n, vector<SX>& fin, vector<SX>& J, SX& U0, vector<SX>& dU, SX& mu) {
+    SX U = U0;
+    
+    complex<SX> expth = complex<SX>(1, 0);
+    complex<SX> expmth = ~expth;
+    complex<SX> exp2th = expth*expth;
+    complex<SX> expm2th = ~exp2th;
+
+    vector<complex<SX>* > f(L);
+    vector<SX> norm2(L, 0);
+    for (int j = 0; j < L; j++) {
+        f[j] = reinterpret_cast<complex<SX>*> (&fin[2 * j * dim]);
+        for (int m = 0; m <= nmax; m++) {
+            norm2[j] += f[j][m].real() * f[j][m].real() + f[j][m].imag() * f[j][m].imag();
+        }
+    }
+
+
+    complex<SX> E = complex<SX>(0, 0);
+
+    complex<SX> Ei, Ej1, Ej2, Ej1j2, Ej1k1, Ej2k2;
+
+    //    for (int i = 0; i < L; i++) {
+
+    int k1 = mod(i - 2);
+    int j1 = mod(i - 1);
+    int j2 = mod(i + 1);
+    int k2 = mod(i + 2);
+
+    Ei = complex<SX>(0, 0);
+    Ej1 = complex<SX>(0, 0);
+    Ej2 = complex<SX>(0, 0);
+    Ej1j2 = complex<SX>(0, 0);
+    Ej1k1 = complex<SX>(0, 0);
+    Ej2k2 = complex<SX>(0, 0);
+
+    for (int n = 0; n <= nmax; n++) {
+        Ei += (0.5 * U * n * (n - 1) - mu * n) * ~f[i][n] * f[i][n];
+
+        if (n < nmax) {
+            Ej1 += -J[j1] * expth * g(n, n + 1) * ~f[i][n + 1] * ~f[j1][n]
+                    * f[i][n] * f[j1][n + 1];
+            Ej2 += -J[i] * expmth * g(n, n + 1) * ~f[i][n + 1] * ~f[j2][n] * f[i][n]
+                    * f[j2][n + 1];
+
+            if (n > 0) {
+                Ej1 += 0.5 * J[j1] * J[j1] * exp2th * g(n, n) * g(n - 1, n + 1) * (1 / eps(U, i, j1, n, n))
+                        * ~f[i][n + 1] * ~f[j1][n - 1] * f[i][n - 1] * f[j1][n + 1];
+                Ej2 += 0.5 * J[i] * J[i] * expm2th * g(n, n) * g(n - 1, n + 1) * (1 / eps(U, i, j2, n, n))
+                        * ~f[i][n + 1] * ~f[j2][n - 1] * f[i][n - 1] * f[j2][n + 1];
+            }
+            if (n < nmax - 1) {
+                Ej1 -= 0.5 * J[j1] * J[j1] * exp2th * g(n, n + 2) * g(n + 1, n + 1) * (1 / eps(U, i, j1, n, n + 2))
+                        * ~f[i][n + 2] * ~f[j1][n] * f[i][n] * f[j1][n + 2];
+                Ej2 -= 0.5 * J[i] * J[i] * expm2th * g(n, n + 2) * g(n + 1, n + 1) * (1 / eps(U, i, j2, n, n + 2))
+                        * ~f[i][n + 2] * ~f[j2][n] * f[i][n] * f[j2][n + 2];
+            }
+
+            for (int m = 1; m <= nmax; m++) {
+                if (n != m - 1) {
+                    Ej1 += 0.5 * J[j1] * J[j1] * g(n, m) * g(m - 1, n + 1) * (1 / eps(U, i, j1, n, m))
+                            * (~f[i][n + 1] * ~f[j1][m - 1] * f[i][n + 1] * f[j1][m - 1] -
+                            ~f[i][n] * ~f[j1][m] * f[i][n] * f[j1][m]);
+                    Ej2 += 0.5 * J[i] * J[i] * g(n, m) * g(m - 1, n + 1) * (1 / eps(U, i, j2, n, m))
+                            * (~f[i][n + 1] * ~f[j2][m - 1] * f[i][n + 1] * f[j2][m - 1] -
+                            ~f[i][n] * ~f[j2][m] * f[i][n] * f[j2][m]);
+
+                    for (int p = 0; p < nmax; p++) {
+                        if (p != n - 1 && 2 * n - m == p && n > 0) {
+                            Ej1j2 += 0.5 * J[j1] * J[i] * g(n, m) * g(n - 1, p + 1) * (1 / eps(U, i, j1, n, m))
+                                    * ~f[i][n + 1] * ~f[j1][m - 1] * ~f[j2][p]
+                                    * f[i][n - 1] * f[j1][m] * f[j2][p + 1];
+                            Ej1j2 += 0.5 * J[j1] * J[i] * g(n, m) * g(n - 1, p + 1) * (1 / eps(U, i, j2, n, m))
+                                    * ~f[i][n + 1] * ~f[j2][m - 1] * ~f[j1][p]
+                                    * f[i][n - 1] * f[j2][m] * f[j1][p + 1];
+                        }
+                        if (p != n + 1 && 2 * n - m == p - 2 && n < nmax - 1) {
+                            Ej1j2 -= 0.5 * J[j1] * J[i] * g(n, m) * g(n + 1, p + 1) * (1 / eps(U, i, j1, n, m))
+                                    * ~f[i][n + 2] * ~f[j1][m - 1] * ~f[j2][p]
+                                    * f[i][n] * f[j1][m] * f[j2][p + 1];
+                            Ej1j2 -= 0.5 * J[j1] * J[i] * g(n, m) * g(n + 1, p + 1) * (1 / eps(U, i, j2, n, m))
+                                    * ~f[i][n + 2] * ~f[j2][m - 1] * ~f[j1][p]
+                                    * f[i][n] * f[j2][m] * f[j1][p + 1];
+                        }
+                    }
+
+                    Ej1k1 += 0.5 * J[j1] * J[k1] * exp2th * g(n, m) * g(m - 1, n + 1)*(1 / eps(U, i, j1, n, m))
+                            * (~f[i][n + 1] * ~f[j1][m - 1] * ~f[k1][n]
+                            * f[i][n] * f[j1][m - 1] * f[k1][n + 1] -
+                            ~f[i][n + 1] * ~f[j1][m] * ~f[k1][n]
+                            * f[i][n] * f[j1][m] * f[k1][n + 1]);
+                    Ej2k2 += 0.5 * J[j2] * J[i] * expm2th * g(n, m) * g(m - 1, n + 1)*(1 / eps(U, i, j2, n, m))
+                            * (~f[i][n + 1] * ~f[j2][m - 1] * ~f[k2][n]
+                            * f[i][n] * f[j2][m - 1] * f[k2][n + 1] -
+                            ~f[i][n + 1] * ~f[j2][m] * ~f[k2][n]
+                            * f[i][n] * f[j2][m] * f[k2][n + 1]);
+                }
+            }
+        }
+    }
+
+    E += Ei / norm2[i];
+
+    E += Ej1 / (norm2[i] * norm2[j1]);
+    E += Ej2 / (norm2[i] * norm2[j2]);
+
+    E += Ej1j2 / (norm2[i] * norm2[j1] * norm2[j2]);
+    E += Ej1k1 / (norm2[i] * norm2[j1] * norm2[k1]);
+    E += Ej2k2 / (norm2[i] * norm2[j2] * norm2[k2]);
+
+    return E.real();
+}
+
+/*SX DynamicsProblem::energy(int i, int n, vector<SX>& fin, vector<SX>& J, SX& U0, vector<SX>& dU, SX& mu) {
 
     complex<SX> expth = complex<SX>(1, 0);
     complex<SX> expmth = ~expth;
@@ -1281,7 +1394,7 @@ SX DynamicsProblem::energy(int i, int n, vector<SX>& fin, vector<SX>& J, SX& U0,
     //    }
 
     return E.real();
-}
+}*/
 
 SX DynamicsProblem::canonicala(vector<SX>& fin, vector<SX>& J, SX& U0, vector<SX>& dU, SX& mu) {
 
