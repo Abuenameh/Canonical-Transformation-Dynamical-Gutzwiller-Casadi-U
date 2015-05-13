@@ -480,7 +480,7 @@ vector<Function> DynamicsProblem::Egradf;
 vector<double> DynamicsProblem::sparams;
 vector<double> DynamicsProblem::gsparams;
 
-void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& xi_, vector<double>& f0_, double dt_) {
+void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, double U_, vector<double>& xi_, vector<double>& f0_, double dt_) {
 
     xi = xi_;
     
@@ -490,6 +490,7 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
     sparams.push_back(Ji_);
     sparams.push_back(Jf_);
     sparams.push_back(mu_);
+    sparams.push_back(U_);
     for (double xii : xi_) sparams.push_back(xii);
     sparams.push_back(1);
 
@@ -497,11 +498,12 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
     gsparams.push_back(Ji_);
     gsparams.push_back(Jf_);
     gsparams.push_back(mu_);
+    gsparams.push_back(U_);
     for (double xii : xi_) gsparams.push_back(xii);
     gsparams.push_back(1);
     gsparams.push_back(0);
 
-    U00 = 100;//0.5;//1;
+    U00 = U_;//1;
     J0 = vector<double>(L);
     for (int i = 0; i < L; i++) {
         J0[i] = Ji_;
@@ -528,7 +530,7 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
 
         vector<SX> xiv = SX::sym("xi", 1, 1, L);
 
-        U0 = 100;//0.5;//1;//scale * UW(Wt);
+//        U0 = 100;//0.5;//1;//scale * UW(Wt);
         for (int i = 0; i < L; i++) {
             J[i] = Jt;//scale * JWij(Wt * xiv[i], Wt * xiv[mod(i + 1)]);
             dU[i] = U0 * xiv[i] - U0;//scale * UW(Wt * xiv[i]) - U0;
@@ -538,6 +540,7 @@ void DynamicsProblem::setup(double Ji_, double Jf_, double mu_, vector<double>& 
         paramsv.push_back(Ji);
         paramsv.push_back(Jf);
         paramsv.push_back(mu);
+        paramsv.push_back(U0);
         for (SX xii : xiv) paramsv.push_back(xii);
         paramsv.push_back(tau);
 

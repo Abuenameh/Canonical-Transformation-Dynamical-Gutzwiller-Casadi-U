@@ -64,7 +64,7 @@ boost::mutex problem_mutex;
 boost::random::mt19937 rng;
 boost::random::uniform_real_distribution<> uni(-1, 1);
 
-void threadfunc(double Ji, double Jf, double mu, vector<double> xi, double tauf, queue<input>& inputs, vector<results>& res, progress_display& progress, barrier& bar, int thread) {
+void threadfunc(double Ji, double Jf, double mu, double U, vector<double> xi, double tauf, queue<input>& inputs, vector<results>& res, progress_display& progress, barrier& bar, int thread) {
     DynamicsProblem* prob;
 
     {
@@ -191,26 +191,26 @@ int main(int argc, char** argv) {
 
     double mu = lexical_cast<double>(argv[4]);
 
-    double Ui = 1;//UWi(Wi);
+    double U = lexical_cast<double>(argv[5]);//1;//UWi(Wi);
 
-    double D = lexical_cast<double>(argv[5]);
+    double D = lexical_cast<double>(argv[6]);
 
-    double taui = lexical_cast<double>(argv[6]);
-    double tauf = lexical_cast<double>(argv[7]);
-    int ntaus = lexical_cast<int>(argv[8]);
+    double taui = lexical_cast<double>(argv[7]);
+    double tauf = lexical_cast<double>(argv[8]);
+    int ntaus = lexical_cast<int>(argv[9]);
     //    double tf = 2*tau;
     //    int nsteps = lexical_cast<int>(argv[9]);
 
-        double dt = lexical_cast<double>(argv[9]);
+        double dt = lexical_cast<double>(argv[10]);
     //    int dnsav = lexical_cast<int>(argv[8]);
 
     //    int nsteps = (int) ceil(2 * tau / dt);
     //    double h = 2 * tau / nsteps;
 
 
-    int numthreads = lexical_cast<int>(argv[10]);
+    int numthreads = lexical_cast<int>(argv[11]);
 
-    int resi = lexical_cast<int>(argv[11]);
+    int resi = lexical_cast<int>(argv[12]);
     //    int resi = 0;
     //    if (argc > 9) {
     //        resi = lexical_cast<int>(argv[9]);
@@ -218,9 +218,9 @@ int main(int argc, char** argv) {
 
     int subresi = -1;
     int seed2 = 0;
-    if (argc > 12) {
+    if (argc > 13) {
 //        subresi = lexical_cast<int>(argv[12]);
-        seed2 = lexical_cast<int>(argv[12]);
+        seed2 = lexical_cast<int>(argv[13]);
     }
 
 #ifdef AMAZON
@@ -272,14 +272,14 @@ int main(int argc, char** argv) {
     }
 
     //        double Ui = UWi(Wi);
-    double mui = mu * Ui;
+    double mui = mu * U;
 
     filesystem::ofstream os(resfile);
         printMath(os, "seed", resi, seed);
         printMath(os, "Delta", resi, D);
     //    printMath(os, "Wres", resi, Wi);
-    printMath(os, "mures", resi, mui);
-    printMath(os, "Ures", resi, Ui);
+    printMath(os, "mures", resi, mu);
+    printMath(os, "Ures", resi, U);
     printMath(os, "xires", resi, xi);
     os << flush;
 
@@ -321,13 +321,13 @@ int main(int argc, char** argv) {
             f0[i] = uni(rng);
         }
 
-    DynamicsProblem::setup(Ji, Jf, mui, xi, f0, dt);
+    DynamicsProblem::setup(Ji, Jf, mu, U, xi, f0, dt);
     
     barrier bar(numthreads);
     
     thread_group threads;
     for (int i = 0; i < numthreads; i++) {
-        threads.create_thread(bind(&threadfunc, Ji, Jf, mui, xi, tauf, boost::ref(inputs), boost::ref(res), boost::ref(progress), boost::ref(bar), i));
+        threads.create_thread(bind(&threadfunc, Ji, Jf, mu, U, xi, tauf, boost::ref(inputs), boost::ref(res), boost::ref(progress), boost::ref(bar), i));
     }
     threads.join_all();
 

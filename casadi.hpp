@@ -38,7 +38,7 @@ public:
 
     void setTau(double tau_);
 
-    static void setup(double Ji_, double Jf_, double mu_, vector<double>& xi_, vector<double>& f0_, double dt_);
+    static void setup(double Ji_, double Jf_, double mu_, double U_, vector<double>& xi_, vector<double>& f0_, double dt_);
 
     static double E(const vector<double>& f, vector<double>& grad);
 
