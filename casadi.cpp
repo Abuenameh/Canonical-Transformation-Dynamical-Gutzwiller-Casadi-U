@@ -1190,10 +1190,10 @@ SX DynamicsProblem::energy(int i, int n, vector<SX>& fin, vector<SX>& J, SX& U0,
                         * (~f[i][n + 1] * ~f[j2][m - 1] * f[i][n + 1] * f[j2][m - 1] -
                         ~f[i][n] * ~f[j2][m] * f[i][n] * f[j2][m]);
 
-                Ej1 += J[j1] * expth * g(n, m) * (eps(dU, i, j1, n, m) / eps(U0, n, m))
-                        * ~f[i][n + 1] * ~f[j1][m - 1] * f[i][n] * f[j1][m];
-                Ej2 += J[i] * expmth * g(n, m) * (eps(dU, i, j2, n, m) / eps(U0, n, m))
-                        * ~f[i][n + 1] * ~f[j2][m - 1] * f[i][n] * f[j2][m];
+//                Ej1 += J[j1] * expth * g(n, m) * (eps(dU, i, j1, n, m) / eps(U0, n, m))
+//                        * ~f[i][n + 1] * ~f[j1][m - 1] * f[i][n] * f[j1][m];
+//                Ej2 += J[i] * expmth * g(n, m) * (eps(dU, i, j2, n, m) / eps(U0, n, m))
+//                        * ~f[i][n + 1] * ~f[j2][m - 1] * f[i][n] * f[j2][m];
 
 //                if (n != m - 3 && m > 1 && n < nmax - 1) {
 //                    Ej1 += -0.5 * J[j1] * J[j1] * exp2th * g(n, m) * g(n + 1, m - 1)
